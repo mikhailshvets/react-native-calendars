@@ -170,13 +170,13 @@ class ReactComp extends Component {
       }
     }
     const scrollPosition = reservations.length;
-    const iterator = props.selectedDay.clone();
-    for (let i = 0; i < 31; i++) {
-      const res = this.getReservationsForDay(iterator, props);
+    const keys = Object.keys(props.reservations);
+    for (let i = 0; i < keys.length; i++) {
+      const day = XDate.parse(keys[i]);
+      const res = this.getReservationsForDay(day, props);
       if (res) {
         reservations = reservations.concat(res);
       }
-      iterator.addDays(1);
     }
 
     return {reservations, scrollPosition};
