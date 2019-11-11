@@ -11,7 +11,7 @@ import styleConstructor from './style';
 import {VelocityTracker} from '../input';
 
 
-const HEADER_HEIGHT = 104;
+const HEADER_HEIGHT = 124;
 const KNOB_HEIGHT = 24;
 //Fallback when RN version is < 0.44
 const viewPropTypes = ViewPropTypes || View.propTypes;
@@ -185,7 +185,7 @@ export default class AgendaView extends Component {
   }
 
   onVisibleMonthsChange(months) {
-    if (this.props.items && !this.state.firstResevationLoad) {
+    if (this.props.items && !this.state.firstResevationLoad && this.state.calendarScrollable) {
       clearTimeout(this.scrollTimeout);
       this.scrollTimeout = setTimeout(() => {
         if (this.props.loadItemsForMonth && this._isMounted) {
@@ -196,7 +196,7 @@ export default class AgendaView extends Component {
   }
 
   loadReservations(props) {
-    if ((!props.items || !Object.keys(props.items).length) && !this.state.firstResevationLoad) {
+    if ((!props.items || !Object.keys(props.items).length)) {
       this.setState({
         firstResevationLoad: true
       }, () => {
@@ -335,7 +335,7 @@ export default class AgendaView extends Component {
     const agendaHeight = Math.max(0, this.viewHeight - HEADER_HEIGHT);
     const weekDaysNames = dateutils.weekDayNames(this.props.firstDay);
     
-    const weekdaysStyle = [this.styles.weekdays, {
+    const weekdaysStyle = [this.styles.weekdaysWrapper, {
       opacity: this.state.scrollY.interpolate({
         inputRange: [agendaHeight - HEADER_HEIGHT, agendaHeight],
         outputRange: [0, 1],
@@ -431,10 +431,17 @@ export default class AgendaView extends Component {
           {knob}
         </Animated.View>
         <Animated.View style={weekdaysStyle}>
-          {this.props.showWeekNumbers && <Text allowFontScaling={false} style={this.styles.weekday} numberOfLines={1}></Text>}
-          {weekDaysNames.map((day, index) => (
-            <Text allowFontScaling={false} key={day+index} style={this.styles.weekday} numberOfLines={1}>{day}</Text>
-          ))}
+          <View style={this.styles.weekdays}>
+            <Text allowFontScaling={false} style={this.styles.monthText} accessibilityTraits='header'>
+              {this.state.selectedDay.toString(this.props.monthFormat)}
+            </Text>
+          </View>
+          <View style={this.styles.weekdays}>
+            {this.props.showWeekNumbers && <Text allowFontScaling={false} style={this.styles.weekday} numberOfLines={1}></Text>}
+            {weekDaysNames.map((day, index) => (
+              <Text allowFontScaling={false} key={day+index} style={this.styles.weekday} numberOfLines={1}>{day}</Text>
+            ))}
+          </View>
         </Animated.View>
         <Animated.ScrollView
           ref={c => this.scrollPad = c}

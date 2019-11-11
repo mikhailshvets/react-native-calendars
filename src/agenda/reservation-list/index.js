@@ -51,7 +51,7 @@ class ReactComp extends Component {
   }
 
   componentWillMount() {
-    this.updateDataSource(this.getReservations(this.props).reservations);
+    this.updateDataSource(this.getAllReservations(this.props).reservations);
   }
 
   updateDataSource(reservations) {
@@ -61,7 +61,7 @@ class ReactComp extends Component {
   }
 
   updateReservations(props) {
-    const reservations = this.getReservations(props);
+    const reservations = this.getAllReservations(props);
     if (this.list && !dateutils.sameDate(props.selectedDay, this.selectedDay)) {
       let scrollPosition = 0;
       for (let i = 0; i < reservations.scrollPosition; i++) {
@@ -75,12 +75,8 @@ class ReactComp extends Component {
   }
 
   componentWillReceiveProps(props) {
-    if (!dateutils.sameDate(props.topDay, this.props.topDay)) {
-      this.setState({
-        reservations: []
-      }, () => {
-        this.updateReservations(props);
-      });
+    if (!this.state.reservations.length) {
+      this.updateDataSource(this.getAllReservations(props).reservations);
     } else {
       this.updateReservations(props);
     }
@@ -151,6 +147,28 @@ class ReactComp extends Component {
     this.scrollOver = true;
   }
 
+  getAllReservations(props) {
+    if (!props.reservations || !props.selectedDay) {
+      return {reservations: [], scrollPosition: 0};
+    }
+
+    let reservations = [];
+    let scrollPosition = 0;
+    const keys = Object.keys(props.reservations).sort();
+    for (let i = 0; i < keys.length; i++) {
+      const day = XDate(keys[i]);
+      const res = this.getReservationsForDay(day, props);
+      if (res) {
+        reservations = reservations.concat(res);
+      }
+      if (day.diffDays(XDate(props.selectedDay)) > 0) {
+        scrollPosition += res ? res.length : 0;
+      }
+    }
+
+    return {reservations, scrollPosition};
+  }
+
   getReservations(props) {
     if (!props.reservations || !props.selectedDay) {
       return {reservations: [], scrollPosition: 0};
@@ -158,25 +176,27 @@ class ReactComp extends Component {
     let reservations = [];
     if (this.state.reservations && this.state.reservations.length) {
       const iterator = this.state.reservations[0].day.clone();
-      while (iterator.getTime() < props.selectedDay.getTime()) {
+      const selectedDay = props.selectedDay.clone().setHours(0, 0, 0, 0);
+      
+      iterator.addMinutes(Math.abs(iterator.getTimezoneOffset()));
+      while (iterator.getTime() < selectedDay.getTime() && iterator.getUTCDate() < selectedDay.getUTCDate()) {
         const res = this.getReservationsForDay(iterator, props);
-        if (!res) {
-          reservations = [];
-          break;
-        } else {
+        if (res) {
           reservations = reservations.concat(res);
         }
         iterator.addDays(1);
       }
     }
+
     const scrollPosition = reservations.length;
-    const keys = Object.keys(props.reservations);
-    for (let i = 0; i < keys.length; i++) {
-      const day = XDate.parse(keys[i]);
-      const res = this.getReservationsForDay(day, props);
+    const iterator = props.selectedDay.clone();
+    for (let i = 0; i < 31; i++) {
+      const res = this.getReservationsForDay(iterator, props);
       if (res) {
         reservations = reservations.concat(res);
       }
+
+      iterator.addDays(1);
     }
 
     return {reservations, scrollPosition};
@@ -191,6 +211,7 @@ class ReactComp extends Component {
         <ActivityIndicator style={{marginTop: 80}} color={this.props.theme && this.props.theme.indicatorColor} />
       );
     }
+
     return (
       <FlatList
         ref={(c) => this.list = c}

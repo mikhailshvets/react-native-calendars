@@ -6,9 +6,10 @@ const STYLESHEET_ID = 'stylesheet.agenda.main';
 
 export default function styleConstructor(theme = {}) {
   const appStyle = {...defaultStyle, ...theme};
-  const { knob, weekdays } = platformStyles(appStyle);
+  const { knob, weekdaysWrapper, weekdays } = platformStyles(appStyle);
   return StyleSheet.create({
     knob,
+    weekdaysWrapper,
     weekdays,
     header: {
       overflow: 'hidden',
@@ -44,6 +45,13 @@ export default function styleConstructor(theme = {}) {
       flex: 1,
       marginTop: 104,
       backgroundColor: appStyle.backgroundColor
+    },
+    monthText: {
+      fontSize: appStyle.textMonthFontSize,
+      fontFamily: appStyle.textMonthFontFamily,
+      fontWeight: appStyle.textMonthFontWeight,
+      color: appStyle.monthTextColor,
+      marginTop: 10,
     },
     ...(theme[STYLESHEET_ID] || {})
   });

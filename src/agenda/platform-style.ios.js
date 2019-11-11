@@ -7,18 +7,23 @@ export default function platformStyles(appStyle) {
       borderRadius: 3,
       backgroundColor: appStyle.agendaKnobColor
     },
-    weekdays: {
+    weekdaysWrapper: {
       position: 'absolute',
       left: 0,
       right: 0,
-      top: 0,
-      flexDirection: 'row',
+      top: -20,
       justifyContent: 'space-around',
       marginLeft: 15,
       marginRight: 15,
       paddingTop: 15,
       paddingBottom: 7,
       backgroundColor: appStyle.calendarBackground
+    },
+    weekdays: {
+      flex: 1,
+      flexDirection: 'row',
+      width: '100%',
+      justifyContent: 'space-around',
     },
   };
 }
