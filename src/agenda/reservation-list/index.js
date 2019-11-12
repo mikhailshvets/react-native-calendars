@@ -154,6 +154,9 @@ class ReactComp extends Component {
 
     let reservations = [];
     let scrollPosition = 0;
+    if (!props.reservations[props.selectedDay.toString('yyyy-MM-dd')]) {
+      props.reservations[props.selectedDay.toString('yyyy-MM-dd')] = [];
+    }
     const keys = Object.keys(props.reservations).sort();
     for (let i = 0; i < keys.length; i++) {
       const day = XDate(keys[i]);
@@ -169,41 +172,8 @@ class ReactComp extends Component {
     return {reservations, scrollPosition};
   }
 
-  getReservations(props) {
-    if (!props.reservations || !props.selectedDay) {
-      return {reservations: [], scrollPosition: 0};
-    }
-    let reservations = [];
-    if (this.state.reservations && this.state.reservations.length) {
-      const iterator = this.state.reservations[0].day.clone();
-      const selectedDay = props.selectedDay.clone().setHours(0, 0, 0, 0);
-      
-      iterator.addMinutes(Math.abs(iterator.getTimezoneOffset()));
-      while (iterator.getTime() < selectedDay.getTime() && iterator.getUTCDate() < selectedDay.getUTCDate()) {
-        const res = this.getReservationsForDay(iterator, props);
-        if (res) {
-          reservations = reservations.concat(res);
-        }
-        iterator.addDays(1);
-      }
-    }
-
-    const scrollPosition = reservations.length;
-    const iterator = props.selectedDay.clone();
-    for (let i = 0; i < 31; i++) {
-      const res = this.getReservationsForDay(iterator, props);
-      if (res) {
-        reservations = reservations.concat(res);
-      }
-
-      iterator.addDays(1);
-    }
-
-    return {reservations, scrollPosition};
-  }
-
   render() {
-    if (!this.props.reservations || !this.props.reservations[this.props.selectedDay.toString('yyyy-MM-dd')]) {
+    if (!this.props.reservations) {
       if (this.props.renderEmptyData) {
         return this.props.renderEmptyData();
       }

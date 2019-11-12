@@ -82,7 +82,7 @@ export default class AgendaView extends Component {
     /** Set this true while waiting for new data from a refresh. */
     refreshing: PropTypes.bool,
     /** Display loading indicador. Default = false */
-    displayLoadingIndicator: PropTypes.bool
+    displayLoadingIndicator: PropTypes.bool,
   };
 
   constructor(props) {
@@ -130,7 +130,9 @@ export default class AgendaView extends Component {
       },
       onPanResponderRelease: (e, gestureState) => {
         if (gestureState.dy < 0) {
-          this.showAgenda();
+          this.showAgenda(() => {
+            this.calendar.scrollToDay(this.state.selectedDay, this.calendarOffset() + 1, true);
+          });
         }
         if (gestureState.dy > 0) {
           this.showCalendar();
@@ -228,6 +230,8 @@ export default class AgendaView extends Component {
 
   componentWillUnmount() {
     this._isMounted = false;
+    clearTimeout(this.scrollTimeout);
+    this.scrollTimeout = null;
   }
 
   componentWillReceiveProps(props) {
@@ -237,6 +241,14 @@ export default class AgendaView extends Component {
       });
     } else {
       this.loadReservations(props);
+    }
+
+    const selectedDay = this.state.selectedDay.toString('yyyy-MM-dd');
+
+    if (props.items[selectedDay] && !this.props.items[selectedDay]) {
+      this.scrollTimeout = setTimeout(() => {
+        this.calendar.scrollToDay(this.state.selectedDay, this.calendarOffset() + 1, true);
+      }, 100);
     }
   }
 
@@ -296,20 +308,22 @@ export default class AgendaView extends Component {
     this.setScrollPadPosition(this.initialScrollPadPosition(), true);
     this.calendar.scrollToDay(day, this.calendarOffset() + 1, true);
     
-    if (this.props.loadItemsForMonth) {
-      this.props.loadItemsForMonth(xdateToData(day));
-    }
+    // if (this.props.loadItemsForMonth) {
+    //   this.props.loadItemsForMonth(xdateToData(day));
+    // }
 
     if (this.props.onDayPress) {
       this.props.onDayPress(xdateToData(day));
+    } else if (this.props.loadItemsForMonth) {
+      this.props.loadItemsForMonth(xdateToData(day));
     }
 
     this.showAgenda();
   }
 
-  showAgenda() {
+  showAgenda(cb = () => {}) {
     this.state.scrollY.flattenOffset();
-    Animated.timing(this.state.scrollY, { toValue: 0, duration: 200 }).start();
+    Animated.timing(this.state.scrollY, { toValue: 0, duration: 200 }).start(cb);
     this.disableCalendarScrolling();
   }
 

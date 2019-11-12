@@ -146,15 +146,9 @@ class AgendaList extends Component {
         onScroll={this.onScroll}
         onMomentumScrollBegin={this.onMomentumScrollBegin}
         onMomentumScrollEnd={this.onMomentumScrollEnd}
-        // onScrollToIndexFailed={(info) => { console.warn('onScrollToIndexFailed info: ', info); }}
-        // getItemLayout={this.getItemLayout} // onViewableItemsChanged is not updated when list scrolls!!!
       />
     );
   }
-
-  // getItemLayout = (data, index) => {
-  //   return {length: commons.screenWidth, offset: commons.screenWidth  * index, index};
-  // }
 }
 
 export default asCalendarConsumer(AgendaList);
