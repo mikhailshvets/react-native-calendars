@@ -31,7 +31,8 @@ export default function styleConstructor(theme = {}) {
       height: 24,
       bottom: 0,
       alignItems: 'center',
-      backgroundColor: appStyle.calendarBackground
+      backgroundColor: appStyle.calendarBackground,
+      zIndex: 1,
     },
     weekday: {
       width: 32,
@@ -52,6 +53,7 @@ export default function styleConstructor(theme = {}) {
       fontWeight: appStyle.textMonthFontWeight,
       color: appStyle.monthTextColor,
       marginTop: 10,
+      marginBottom: 5,
     },
     ...(theme[STYLESHEET_ID] || {})
   });
